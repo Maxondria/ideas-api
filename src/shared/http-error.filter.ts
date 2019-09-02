@@ -3,6 +3,7 @@ import {
   ExceptionFilter,
   HttpException,
   ArgumentsHost,
+  Logger,
 } from '@nestjs/common';
 
 import { Request, Response } from 'express';
@@ -23,6 +24,12 @@ export class HttpErrorFilter implements ExceptionFilter {
       method: request.method,
       message: exception.message.error || exception.message,
     };
+
+    Logger.error(
+      `${request.method} ${request.url}`,
+      `ERROR OCCURED: ${exception.message.error || exception.message}`,
+      'ExceptionFilter',
+    );
 
     response.status(status).json(errorResponse);
   }
