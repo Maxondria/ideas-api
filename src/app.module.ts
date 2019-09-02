@@ -5,7 +5,8 @@ import { AppService } from './app.service';
 import { IdeaModule } from './idea/idea.module';
 import { join } from 'path';
 import { HttpErrorFilter } from './shared/http-error.filter';
-import { APP_FILTER } from '@nestjs/core';
+import { LoggingInterceptor } from './shared/logging.interceptor';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -30,6 +31,10 @@ import { APP_FILTER } from '@nestjs/core';
     {
       provide: APP_FILTER,
       useClass: HttpErrorFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
     },
   ],
 })
