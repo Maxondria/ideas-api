@@ -1,17 +1,25 @@
 import {
   Entity,
   PrimaryGeneratedColumn,
-  Column,
   CreateDateColumn,
+  Column,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
-export class Idea {
-  @PrimaryGeneratedColumn() id: string;
+export class ideaEntity {
+  @PrimaryGeneratedColumn()
+  id: string;
 
-  @CreateDateColumn() created: Date;
+  @CreateDateColumn()
+  created: Date;
 
-  @Column('text') idea: string;
+  @UpdateDateColumn()
+  updated: Date;
 
-  @Column('text') description: string;
+  @Column('text')
+  idea: string;
+
+  @Column('text')
+  description: string;
 }
