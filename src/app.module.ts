@@ -7,6 +7,7 @@ import { join } from 'path';
 import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -17,13 +18,14 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
       port: 5432,
       dropSchema: true,
       logging: true,
-      username: 'max',
-      password: 'maxondria',
+      username: 'postgres',
+      password: '',
       database: 'ideas_app',
       entities: [join(__dirname, '**/**.entity{.ts,.js}')],
       synchronize: true,
     }),
     IdeaModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
