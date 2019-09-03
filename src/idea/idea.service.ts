@@ -41,8 +41,8 @@ export class IdeaService {
   async updateIdea(id: string, data: Partial<IdeaDTO>) {
     try {
       const idea = await this.ideaExists(id);
-      await this.ideaRepository.update({ id }, data);
-      return idea;
+      await this.ideaRepository.update({ id: idea.id }, data);
+      return await this.ideaExists(id);
     } catch (error) {
       throw error;
     }
