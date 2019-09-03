@@ -4,6 +4,8 @@
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "target": "es2017",
     "sourceMap": true,
