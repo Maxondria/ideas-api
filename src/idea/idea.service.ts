@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ideaEntity } from './idea.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +11,14 @@ export class IdeaService {
     private ideaRepository: Repository<ideaEntity>,
   ) {}
 
+  private async ideaExists(id: string): Promise<ideaEntity> {
+    const idea = await this.ideaRepository.findOne({ where: { id } });
+    if (!idea) {
+      throw new HttpException('Resource Not Found', HttpStatus.NOT_FOUND);
+    }
+    return idea;
+  }
+
   async showAllIdeas() {
     return await this.ideaRepository.find();
   }
@@ -22,16 +30,31 @@ export class IdeaService {
   }
 
   async readIdea(id: string) {
-    return this.ideaRepository.findOne({ where: { id } });
+    try {
+      const idea = await this.ideaExists(id);
+      return idea;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async updateIdea(id: string, data: Partial<IdeaDTO>) {
-    await this.ideaRepository.update({ id }, data);
-    return this.ideaRepository.findOne({ id });
+    try {
+      const idea = await this.ideaExists(id);
+      await this.ideaRepository.update({ id }, data);
+      return idea;
+    } catch (error) {
+      throw error;
+    }
   }
 
   async removeIdea(id: string) {
-    await this.ideaRepository.delete({ id });
-    return { deleted: 'deleted' };
+    try {
+      const idea = await this.ideaExists(id);
+      await this.ideaRepository.delete({ id: idea.id });
+      return { deleted: 'deleted' };
+    } catch (error) {
+      throw error;
+    }
   }
 }
