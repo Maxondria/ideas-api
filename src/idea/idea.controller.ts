@@ -54,14 +54,17 @@ export class IdeaController {
   async updateIdea(
     @Param('id') id: string,
     @Body() data: Partial<IdeaDTO>,
+    @CustomUser('id') user: string,
   ): Promise<IdeaRO> {
-    this.logger.warn(`NEW POST DATA: ${JSON.stringify(data)}`);
-    return await this.IdeaService.updateIdea(id, data);
+    return await this.IdeaService.updateIdea(id, user, data);
   }
 
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  async removeIdea(@Param('id') id: string): Promise<{ deleted: string }> {
-    return await this.IdeaService.removeIdea(id);
+  async removeIdea(
+    @Param('id') id: string,
+    @CustomUser('id') user: string,
+  ): Promise<{ deleted: string }> {
+    return await this.IdeaService.removeIdea(id, user);
   }
 }
