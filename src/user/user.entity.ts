@@ -41,8 +41,14 @@ export class userEntity {
   }
 
   toResponseObject(): UserRO {
-    const { id, created, username, updated } = this;
-    return { id, created, username, updated };
+    const { id, created, username, updated, ideas } = this;
+    let response;
+    if (ideas) {
+      response = { id, created, username, updated, ideas };
+    } else {
+      response = { id, created, username, updated };
+    }
+    return response;
   }
 
   async comparePassword(attempt: string): Promise<boolean> {
