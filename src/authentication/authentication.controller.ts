@@ -7,16 +7,22 @@ import {
   UseGuards,
   Request,
 } from '@nestjs/common';
-import { UserService } from './user.service';
-import { UserDTO } from './user.dto';
+
 import { ValidationPipe } from '../shared/validation.pipe';
 // import { AuthGuard } from '../shared/auth.guard';
-import { CustomUser } from './user.decorator';
+
+import { VerificationService } from '../stratergies/verification.service';
+import { CustomUser } from '../user/user.decorator';
+import { UserDTO } from '../user/user.dto';
+import { UserService } from '../user/user.service';
 import { AuthGuard } from '@nestjs/passport';
 
-@Controller('api/users')
-export class UserController {
-  constructor(private UserService: UserService) {}
+@Controller('api/auth')
+export class AuthenticationController {
+  constructor(
+    private UserService: UserService,
+    private verificationService: VerificationService,
+  ) {}
 
   @Get('find/all')
   // @UseGuards(new AuthGuard())
@@ -27,7 +33,10 @@ export class UserController {
   @UseGuards(AuthGuard('local'))
   @Post('login')
   async Login(@Request() req) {
-    return req.user;
+    return {
+      ...req.user,
+      ...(await this.verificationService.AccessToken(req.user)),
+    };
   }
 
   @Post('register')
