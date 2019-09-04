@@ -5,10 +5,12 @@ import {
   Column,
   UpdateDateColumn,
   BeforeInsert,
+  OneToMany,
 } from 'typeorm';
 
 import { hash, compare } from 'bcryptjs';
 import { UserRO } from './user.dto';
+import { ideaEntity } from '../idea/idea.entity';
 
 @Entity('user')
 export class userEntity {
@@ -30,14 +32,23 @@ export class userEntity {
   @Column('text')
   password: string;
 
+  @OneToMany(type => ideaEntity, idea => idea.author)
+  ideas: ideaEntity;
+
   @BeforeInsert()
   async hashPassword(): Promise<void> {
     this.password = await hash(this.password, 10);
   }
 
   toResponseObject(): UserRO {
-    const { id, created, username, updated } = this;
-    return { id, created, username, updated };
+    const { id, created, username, updated, ideas } = this;
+    let response;
+    if (ideas) {
+      response = { id, created, username, updated, ideas };
+    } else {
+      response = { id, created, username, updated };
+    }
+    return response;
   }
 
   async comparePassword(attempt: string): Promise<boolean> {
