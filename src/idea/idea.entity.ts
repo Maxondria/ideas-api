@@ -4,7 +4,9 @@ import {
   CreateDateColumn,
   Column,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { userEntity } from '../user/user.entity';
 
 @Entity('idea')
 export class ideaEntity {
@@ -22,4 +24,7 @@ export class ideaEntity {
 
   @Column('text')
   description: string;
+
+  @ManyToOne(type => userEntity, author => author.ideas)
+  author: userEntity;
 }
