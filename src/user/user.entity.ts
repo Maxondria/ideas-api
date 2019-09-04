@@ -6,6 +6,8 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 import { hash, compare } from 'bcryptjs';
@@ -35,18 +37,23 @@ export class userEntity {
   @OneToMany(type => ideaEntity, idea => idea.author)
   ideas: ideaEntity;
 
+  @ManyToMany(type => ideaEntity, { cascade: true })
+  @JoinTable()
+  bookmarks: ideaEntity[];
+
   @BeforeInsert()
   async hashPassword(): Promise<void> {
     this.password = await hash(this.password, 10);
   }
 
   toResponseObject(): UserRO {
-    const { id, created, username, updated, ideas } = this;
-    let response;
+    const { id, created, username, updated, ideas, bookmarks } = this;
+    let response: any = { id, created, username, updated };
     if (ideas) {
-      response = { id, created, username, updated, ideas };
-    } else {
-      response = { id, created, username, updated };
+      response.ideas = ideas;
+    }
+    if (bookmarks) {
+      response.bookmarks = bookmarks;
     }
     return response;
   }
