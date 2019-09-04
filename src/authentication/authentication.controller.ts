@@ -9,7 +9,6 @@ import {
 } from '@nestjs/common';
 
 import { ValidationPipe } from '../shared/validation.pipe';
-// import { AuthGuard } from '../shared/auth.guard';
 
 import { VerificationService } from '../stratergies/verification.service';
 import { CustomUser } from '../user/user.decorator';
@@ -25,7 +24,7 @@ export class AuthenticationController {
   ) {}
 
   @Get('find/all')
-  // @UseGuards(new AuthGuard())
+  @UseGuards(AuthGuard('jwt'))
   async RegisteredUsers(@CustomUser() authedUser) {
     return await this.UserService.RegisteredUsers();
   }
