@@ -25,8 +25,19 @@ export class IdeaService {
     return this.sanitizeDataWithUser(idea);
   }
 
-  private sanitizeDataWithUser(idea: ideaEntity): IdeaRO {
-    return { ...idea, author: idea.author.toResponseObject() };
+  private sanitizeDataWithUser(idea: ideaEntity): IdeaRO | any {
+    const response: any = {
+      ...idea,
+      author: idea.author.toResponseObject(),
+    };
+    if (response.upvotes) {
+      response.upvotes = idea.upvotes.length;
+    }
+
+    if (response.downvotes) {
+      response.downvotes = idea.downvotes.length;
+    }
+    return response;
   }
 
   private EnsureIdeaOwnership(idea: IdeaRO, user: string): void {
@@ -36,7 +47,9 @@ export class IdeaService {
   }
 
   async showAllIdeas(): Promise<IdeaRO[]> {
-    const ideas = await this.ideaRepository.find({ relations: ['author'] });
+    const ideas = await this.ideaRepository.find({
+      relations: ['author', 'upvotes', 'downvotes'],
+    });
     return ideas.map(idea => this.sanitizeDataWithUser(idea));
   }
 
