@@ -8,6 +8,7 @@ import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { UserModule } from './user/user.module';
       synchronize: true,
     }),
     IdeaModule,
-    UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
