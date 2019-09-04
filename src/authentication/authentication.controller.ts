@@ -11,7 +11,6 @@ import {
 import { ValidationPipe } from '../shared/validation.pipe';
 
 import { VerificationService } from '../stratergies/verification.service';
-import { CustomUser } from '../user/user.decorator';
 import { UserDTO } from '../user/user.dto';
 import { UserService } from '../user/user.service';
 import { AuthGuard } from '@nestjs/passport';
@@ -25,7 +24,7 @@ export class AuthenticationController {
 
   @Get('find/all')
   @UseGuards(AuthGuard('jwt'))
-  async RegisteredUsers(@CustomUser() authedUser) {
+  async RegisteredUsers() {
     return await this.UserService.RegisteredUsers();
   }
 
