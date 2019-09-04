@@ -4,6 +4,7 @@ import { ideaEntity } from './idea.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IdeaDTO, IdeaRO } from './idea.dto';
 import { userEntity } from '../user/user.entity';
+import { UserRO } from '../user/user.dto';
 
 @Injectable()
 export class IdeaService {
@@ -38,6 +39,18 @@ export class IdeaService {
       response.downvotes = idea.downvotes.length;
     }
     return response;
+  }
+
+  private async bookmarksHelper(
+    id: string,
+    userId: string,
+  ): Promise<{ user: userEntity; idea: ideaEntity }> {
+    const idea = await this.ideaRepository.findOne({ where: { id } });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['bookmarks'],
+    });
+    return { user, idea };
   }
 
   private EnsureIdeaOwnership(idea: IdeaRO, user: string): void {
@@ -95,5 +108,33 @@ export class IdeaService {
     } catch (error) {
       throw error;
     }
+  }
+
+  async addBookmark(id: string, userId: string): Promise<UserRO> {
+    const { user, idea } = await this.bookmarksHelper(id, userId);
+
+    if (user.bookmarks.filter(bookmark => bookmark.id === idea.id).length < 1) {
+      user.bookmarks.push(idea);
+      this.userRepository.save(user);
+    } else {
+      throw new HttpException(
+        'IDEA ALREADY BOOKMARKED',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return user.toResponseObject();
+  }
+
+  async deleteBookmark(id: string, userId: string): Promise<UserRO> {
+    const { user, idea } = await this.bookmarksHelper(id, userId);
+    if (user.bookmarks.filter(bookmark => bookmark.id === idea.id).length > 0) {
+      user.bookmarks = user.bookmarks.filter(
+        bookmark => bookmark.id !== idea.id,
+      );
+      this.userRepository.save(user);
+    } else {
+      throw new HttpException('IDEA DOESNOT EXIST', HttpStatus.BAD_REQUEST);
+    }
+    return user.toResponseObject();
   }
 }

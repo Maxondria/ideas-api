@@ -14,6 +14,7 @@ import { IdeaService } from './idea.service';
 import { IdeaDTO, IdeaRO } from './idea.dto';
 import { ValidationPipe } from '../shared/validation.pipe';
 import { CustomUser } from '../user/user.decorator';
+import { UserRO } from '../user/user.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('api/ideas')
@@ -66,5 +67,25 @@ export class IdeaController {
     @CustomUser('id') user: string,
   ): Promise<{ deleted: string }> {
     return await this.IdeaService.removeIdea(id, user);
+  }
+
+  @Post(':id/bookmark')
+  @UseGuards(AuthGuard('jwt'))
+  async addBookmark(
+    @Param('id') id: string,
+    @CustomUser('id') user: string,
+  ): Promise<UserRO> {
+    this.LogData({ id, user });
+    return await this.IdeaService.addBookmark(id, user);
+  }
+
+  @Delete(':id/bookmark')
+  @UseGuards(AuthGuard('jwt'))
+  async deleteBookmark(
+    @Param('id') id: string,
+    @CustomUser('id') user: string,
+  ): Promise<UserRO> {
+    this.LogData({ id, user });
+    return await this.IdeaService.deleteBookmark(id, user);
   }
 }
