@@ -11,7 +11,7 @@ export class UserService {
     private userRepository: Repository<userEntity>,
   ) {}
 
-  private async findUser(
+  async findUser(
     username: string,
     Exception: boolean = true,
   ): Promise<userEntity> {
@@ -26,17 +26,14 @@ export class UserService {
 
   async RegisteredUsers(): Promise<UserRO[]> {
     const users = await this.userRepository.find();
-    return users.map(user => user.toResponseObject(false));
+    return users.map(user => user.toResponseObject());
   }
 
   async Login(data: UserDTO) {
     const { username, password } = data;
     const user = await this.findUser(username, false);
     if (!user || !(await user.comparePassword(password))) {
-      throw new HttpException(
-        'INVALID USERNAME/ PASSWORD',
-        HttpStatus.BAD_REQUEST,
-      );
+      return null;
     }
     return user.toResponseObject();
   }
