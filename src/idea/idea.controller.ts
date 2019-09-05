@@ -69,6 +69,20 @@ export class IdeaController {
     return await this.IdeaService.removeIdea(id, user);
   }
 
+  @Post(':id/upvote')
+  @UseGuards(AuthGuard('jwt'))
+  async upvoteIdea(@Param('id') id: string, @CustomUser('id') user: string) {
+    this.LogData({ id, user });
+    return await this.IdeaService.upvoteIdea(id, user);
+  }
+
+  @Delete(':id/downvote')
+  @UseGuards(AuthGuard('jwt'))
+  async downvoteIdea(@Param('id') id: string, @CustomUser('id') user: string) {
+    this.LogData({ id, user });
+    return await this.IdeaService.downvoteIdea(id, user);
+  }
+
   @Post(':id/bookmark')
   @UseGuards(AuthGuard('jwt'))
   async addBookmark(
