@@ -1,10 +1,11 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ideaEntity } from './idea.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IdeaDTO, IdeaRO } from './idea.dto';
 import { userEntity } from '../user/user.entity';
 import { UserRO } from '../user/user.dto';
+import { Votes } from '../shared/votes.enum';
 
 @Injectable()
 export class IdeaService {
@@ -41,22 +42,86 @@ export class IdeaService {
     return response;
   }
 
-  private async bookmarksHelper(
+  private async UserAndIdeaFinder(
     id: string,
     userId: string,
-  ): Promise<{ user: userEntity; idea: ideaEntity }> {
-    const idea = await this.ideaRepository.findOne({ where: { id } });
-    const user = await this.userRepository.findOne({
+    userRelations?: string[],
+    ideaRelations?: string[],
+  ) {
+    const ideaOptons: any = {
+      where: { id },
+    };
+
+    const userOptions: any = {
       where: { id: userId },
-      relations: ['bookmarks'],
-    });
-    return { user, idea };
+    };
+
+    if (userRelations && userRelations.length > 0) {
+      userOptions.relations = [...userRelations];
+    }
+
+    if (ideaRelations && ideaRelations.length > 0) {
+      ideaOptons.relations = [...ideaRelations];
+    }
+
+    try {
+      const idea = await this.ideaRepository.findOne({ ...ideaOptons });
+      const user = await this.userRepository.findOne({ ...userOptions });
+      return { user, idea };
+    } catch (error) {
+      throw new HttpException(
+        'Could Not Bookmark User/Idea',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
   }
 
   private EnsureIdeaOwnership(idea: IdeaRO, user: string): void {
     if (idea.author.id !== user) {
       throw new HttpException('Incorrect User', HttpStatus.UNAUTHORIZED);
     }
+  }
+
+  private async CastVote(idea: ideaEntity, user: userEntity, vote: Votes) {
+    const opposite = vote === Votes.UP ? Votes.DOWN : Votes.UP;
+    if (
+      idea[opposite].filter(voter => voter.id === user.id).length > 0 ||
+      idea[vote].filter(voter => voter.id === user.id).length > 0
+    ) {
+      idea[opposite] = idea[opposite].filter(voter => voter.id !== user.id);
+      await this.ideaRepository.save(idea);
+    } else if (idea[vote].filter(voter => voter.id === user.id).length < 1) {
+      idea[vote].push(user);
+      await this.ideaRepository.save(idea);
+    } else {
+      throw new HttpException('Unable to Cast Vote', HttpStatus.BAD_REQUEST);
+    }
+    return {
+      ...idea,
+      author: idea.author.toResponseObject(),
+      upvotes: idea.upvotes.length,
+      downvotes: idea.downvotes.length,
+    };
+  }
+
+  async upvoteIdea(id: string, userId: string) {
+    const { idea, user } = await this.UserAndIdeaFinder(
+      id,
+      userId,
+      [],
+      ['author', 'upvotes', 'downvotes'],
+    );
+    return await this.CastVote(idea, user, Votes.UP);
+  }
+
+  async downvoteIdea(id: string, userId: string) {
+    const { idea, user } = await this.UserAndIdeaFinder(
+      id,
+      userId,
+      [],
+      ['author', 'upvotes', 'downvotes'],
+    );
+    return await this.CastVote(idea, user, Votes.DOWN);
   }
 
   async showAllIdeas(): Promise<IdeaRO[]> {
@@ -111,30 +176,46 @@ export class IdeaService {
   }
 
   async addBookmark(id: string, userId: string): Promise<UserRO> {
-    const { user, idea } = await this.bookmarksHelper(id, userId);
+    try {
+      const { idea, user } = await this.UserAndIdeaFinder(id, userId, [
+        'bookmarks',
+      ]);
 
-    if (user.bookmarks.filter(bookmark => bookmark.id === idea.id).length < 1) {
-      user.bookmarks.push(idea);
-      this.userRepository.save(user);
-    } else {
-      throw new HttpException(
-        'IDEA ALREADY BOOKMARKED',
-        HttpStatus.BAD_REQUEST,
-      );
+      if (
+        user.bookmarks.filter(bookmark => bookmark.id === idea.id).length < 1
+      ) {
+        user.bookmarks.push(idea);
+        this.userRepository.save(user);
+      } else {
+        throw new HttpException(
+          'IDEA ALREADY BOOKMARKED',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      return user.toResponseObject();
+    } catch (error) {
+      throw error;
     }
-    return user.toResponseObject();
   }
 
   async deleteBookmark(id: string, userId: string): Promise<UserRO> {
-    const { user, idea } = await this.bookmarksHelper(id, userId);
-    if (user.bookmarks.filter(bookmark => bookmark.id === idea.id).length > 0) {
-      user.bookmarks = user.bookmarks.filter(
-        bookmark => bookmark.id !== idea.id,
-      );
-      this.userRepository.save(user);
-    } else {
-      throw new HttpException('IDEA DOESNOT EXIST', HttpStatus.BAD_REQUEST);
+    try {
+      const { idea, user } = await this.UserAndIdeaFinder(id, userId, [
+        'bookmarks',
+      ]);
+      if (
+        user.bookmarks.filter(bookmark => bookmark.id === idea.id).length > 0
+      ) {
+        user.bookmarks = user.bookmarks.filter(
+          bookmark => bookmark.id !== idea.id,
+        );
+        this.userRepository.save(user);
+      } else {
+        throw new HttpException('IDEA DOESNOT EXIST', HttpStatus.BAD_REQUEST);
+      }
+      return user.toResponseObject();
+    } catch (error) {
+      throw error;
     }
-    return user.toResponseObject();
   }
 }

@@ -16,7 +16,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      dropSchema: true,
+      dropSchema: false,
       logging: true,
       username: 'postgres',
       password: '',
