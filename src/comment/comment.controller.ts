@@ -20,6 +20,11 @@ export class CommentController {
   private logger = new Logger('IdeaController');
   constructor(private CommentService: CommentService) {}
 
+  @Get(':id')
+  async showComment(@Param('id') commentId: string) {
+    return await this.CommentService.showComment(commentId);
+  }
+
   @Get('idea/:id')
   async showCommentsByIdea(@Param('id') ideaId: string) {
     return await this.CommentService.showCommentsByIdea(ideaId);
@@ -30,15 +35,13 @@ export class CommentController {
     return await this.CommentService.showCommentsByUser(userId);
   }
 
-  @Get(':id')
-  async showComment(@Param('id') ideaId: string) {
-    return await this.CommentService.showComment(ideaId);
-  }
-
   @Delete(':id')
   @UseGuards(AuthGuard('jwt'))
-  async deleteComment(@Param('id') ideaId: string) {
-    return await this.CommentService.deleteComment(ideaId);
+  async deleteComment(
+    @Param('id') Id: string,
+    @CustomUser('id') userId: string,
+  ) {
+    return await this.CommentService.deleteComment(Id, userId);
   }
 
   @Post('idea/:id')

@@ -5,11 +5,10 @@ import {
   Column,
   UpdateDateColumn,
   ManyToOne,
-  // ManyToMany,
   JoinTable,
 } from 'typeorm';
 import { userEntity } from '../user/user.entity';
-import { ideaEntity } from 'src/idea/idea.entity';
+import { ideaEntity } from '../idea/idea.entity';
 
 @Entity('comment')
 export class commentEntity {
