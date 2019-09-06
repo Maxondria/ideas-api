@@ -6,14 +6,16 @@ import {
   UpdateDateColumn,
   BeforeInsert,
   OneToMany,
+  ManyToMany,
+  JoinTable,
 } from 'typeorm';
 
 import { hash, compare } from 'bcryptjs';
 import { UserRO } from './user.dto';
-import { ideaEntity } from '../idea/idea.entity';
+import { IdeaEntity } from '../idea/idea.entity';
 
 @Entity('user')
-export class userEntity {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -32,8 +34,12 @@ export class userEntity {
   @Column('text')
   password: string;
 
-  @OneToMany(type => ideaEntity, idea => idea.author)
-  ideas: ideaEntity;
+  @OneToMany(type => IdeaEntity, idea => idea.author)
+  ideas: IdeaEntity;
+
+  @ManyToMany(type => IdeaEntity, { cascade: true })
+  @JoinTable()
+  bookmarks: IdeaEntity[];
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {
@@ -41,12 +47,13 @@ export class userEntity {
   }
 
   toResponseObject(): UserRO {
-    const { id, created, username, updated, ideas } = this;
-    let response;
+    const { id, created, username, updated, ideas, bookmarks } = this;
+    let response: any = { id, created, username, updated };
     if (ideas) {
-      response = { id, created, username, updated, ideas };
-    } else {
-      response = { id, created, username, updated };
+      response.ideas = ideas;
+    }
+    if (bookmarks) {
+      response.bookmarks = bookmarks;
     }
     return response;
   }

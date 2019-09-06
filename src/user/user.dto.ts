@@ -1,5 +1,5 @@
 import { IsNotEmpty, MinLength, IsString } from 'class-validator';
-import { ideaEntity } from '../idea/idea.entity';
+import { IdeaEntity } from '../idea/idea.entity';
 
 export class UserDTO {
   @IsNotEmpty()
@@ -18,6 +18,6 @@ export class UserRO {
   created: Date;
   updated: Date;
   token?: string;
-  ideas?: ideaEntity[];
-  bookmarks?: ideaEntity[];
+  ideas?: IdeaEntity[];
+  bookmarks?: IdeaEntity[];
 }

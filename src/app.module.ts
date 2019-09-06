@@ -8,6 +8,7 @@ import { HttpErrorFilter } from './shared/http-error.filter';
 import { LoggingInterceptor } from './shared/logging.interceptor';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AuthenticationModule } from './authentication/authentication.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
   imports: [
@@ -16,7 +17,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      dropSchema: true,
+      dropSchema: false,
       logging: true,
       username: 'postgres',
       password: '',
@@ -26,6 +27,7 @@ import { AuthenticationModule } from './authentication/authentication.module';
     }),
     IdeaModule,
     AuthenticationModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [

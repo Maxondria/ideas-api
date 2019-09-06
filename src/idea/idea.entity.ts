@@ -5,11 +5,15 @@ import {
   Column,
   UpdateDateColumn,
   ManyToOne,
+  ManyToMany,
+  JoinTable,
+  OneToMany,
 } from 'typeorm';
-import { userEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user.entity';
+import { CommentEntity } from '../comment/comment.entity';
 
 @Entity('idea')
-export class ideaEntity {
+export class IdeaEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -25,6 +29,17 @@ export class ideaEntity {
   @Column('text')
   description: string;
 
-  @ManyToOne(type => userEntity, author => author.ideas)
-  author: userEntity;
+  @ManyToOne(type => UserEntity, author => author.ideas)
+  author: UserEntity;
+
+  @OneToMany(type => CommentEntity, comment => comment.idea, { cascade: true })
+  comments: CommentEntity[];
+
+  @ManyToMany(type => UserEntity, { cascade: true })
+  @JoinTable()
+  upvotes: UserEntity[];
+
+  @ManyToMany(type => UserEntity, { cascade: true })
+  @JoinTable()
+  downvotes: UserEntity[];
 }
