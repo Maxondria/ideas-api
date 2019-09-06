@@ -18,14 +18,14 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('api/auth')
 export class AuthenticationController {
   constructor(
-    private UserService: UserService,
+    private userService: UserService,
     private verificationService: VerificationService,
   ) {}
 
   @Get('find/all')
   @UseGuards(AuthGuard('jwt'))
   async RegisteredUsers() {
-    return await this.UserService.RegisteredUsers();
+    return await this.userService.RegisteredUsers();
   }
 
   @UseGuards(AuthGuard('local'))
@@ -40,6 +40,6 @@ export class AuthenticationController {
   @Post('register')
   @UsePipes(new ValidationPipe())
   async Register(@Body() data: UserDTO) {
-    return await this.UserService.Register(data);
+    return await this.userService.Register(data);
   }
 }

@@ -124,9 +124,11 @@ export class IdeaService {
     return await this.CastVote(idea, user, Votes.DOWN);
   }
 
-  async showAllIdeas(): Promise<IdeaRO[]> {
+  async showAllIdeas(page: number = 1): Promise<IdeaRO[]> {
     const ideas = await this.ideaRepository.find({
       relations: ['author', 'upvotes', 'downvotes', 'comments'],
+      take: 25,
+      skip: 25 * (page - 1),
     });
     return ideas.map(idea => this.ScrapOffUserPassword(idea));
   }
@@ -138,7 +140,7 @@ export class IdeaService {
       await this.ideaRepository.save(idea);
       return this.ScrapOffUserPassword(idea);
     }
-    throw new HttpException('User doesn\'t Exist', HttpStatus.NOT_FOUND);
+    throw new HttpException("User doesn't Exist", HttpStatus.NOT_FOUND);
   }
 
   async readIdea(id: string): Promise<IdeaRO> {
