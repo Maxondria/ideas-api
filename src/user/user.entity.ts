@@ -12,10 +12,10 @@ import {
 
 import { hash, compare } from 'bcryptjs';
 import { UserRO } from './user.dto';
-import { ideaEntity } from '../idea/idea.entity';
+import { IdeaEntity } from '../idea/idea.entity';
 
 @Entity('user')
-export class userEntity {
+export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -34,12 +34,12 @@ export class userEntity {
   @Column('text')
   password: string;
 
-  @OneToMany(type => ideaEntity, idea => idea.author)
-  ideas: ideaEntity;
+  @OneToMany(type => IdeaEntity, idea => idea.author)
+  ideas: IdeaEntity;
 
-  @ManyToMany(type => ideaEntity, { cascade: true })
+  @ManyToMany(type => IdeaEntity, { cascade: true })
   @JoinTable()
-  bookmarks: ideaEntity[];
+  bookmarks: IdeaEntity[];
 
   @BeforeInsert()
   async hashPassword(): Promise<void> {

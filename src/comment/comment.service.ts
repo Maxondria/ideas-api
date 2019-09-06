@@ -1,34 +1,34 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ideaEntity } from '../idea/idea.entity';
-import { userEntity } from '../user/user.entity';
-import { commentEntity } from './comment.entity';
+import { IdeaEntity } from '../idea/idea.entity';
+import { UserEntity } from '../user/user.entity';
+import { CommentEntity } from './comment.entity';
 import { commentDTO } from './comment.dto';
 
 @Injectable()
 export class CommentService {
   constructor(
-    @InjectRepository(ideaEntity)
-    private ideaRepository: Repository<ideaEntity>,
-    @InjectRepository(userEntity)
-    private userRepository: Repository<userEntity>,
-    @InjectRepository(commentEntity)
-    private commentRepository: Repository<commentEntity>,
+    @InjectRepository(IdeaEntity)
+    private ideaRepository: Repository<IdeaEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
+    @InjectRepository(CommentEntity)
+    private commentRepository: Repository<CommentEntity>,
   ) {}
 
-  private async FindAuthorHelper(userId: string, relns?: string[]) {
+  private async FindAuthorHelper(userId: string, relations?: string[]) {
     const condition: any = { where: { id: userId } };
-    if (relns && relns.length > 0) {
-      condition.relations = [...relns];
+    if (relations && relations.length > 0) {
+      condition.relations = [...relations];
     }
     return await this.userRepository.findOne({ ...condition });
   }
 
-  private async FindCommentHelper(id: string, relns?: string[]) {
+  private async FindCommentHelper(id: string, relations?: string[]) {
     const condition: any = { where: { id } };
-    if (relns && relns.length > 0) {
-      condition.relations = [...relns];
+    if (relations && relations.length > 0) {
+      condition.relations = [...relations];
     }
     const comment = await this.commentRepository.findOne({ ...condition });
 
@@ -38,10 +38,10 @@ export class CommentService {
     return comment;
   }
 
-  private async findIdeaHelper(ideaId: string, relns?: string[]) {
+  private async findIdeaHelper(ideaId: string, relations?: string[]) {
     const condition: any = { where: { id: ideaId } };
-    if (relns && relns.length > 0) {
-      condition.relations = [...relns];
+    if (relations && relations.length > 0) {
+      condition.relations = [...relations];
     }
     return await this.ideaRepository.findOne({ ...condition });
   }
