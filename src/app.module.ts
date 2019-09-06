@@ -17,7 +17,7 @@ import { CommentModule } from './comment/comment.module';
       type: 'postgres',
       host: 'localhost',
       port: 5432,
-      dropSchema: false,
+      dropSchema: true,
       logging: true,
       username: 'postgres',
       password: '',

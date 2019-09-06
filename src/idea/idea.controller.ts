@@ -9,6 +9,7 @@ import {
   UsePipes,
   Logger,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { IdeaService } from './idea.service';
 import { IdeaDTO, IdeaRO } from './idea.dto';
@@ -20,7 +21,7 @@ import { AuthGuard } from '@nestjs/passport';
 @Controller('api/ideas')
 export class IdeaController {
   private logger = new Logger('IdeaController');
-  constructor(private IdeaService: IdeaService) {}
+  constructor(private ideaService: IdeaService) {}
 
   private LogData(options: any) {
     options.user && this.logger.log('USER ' + JSON.stringify(options.user));
@@ -29,8 +30,8 @@ export class IdeaController {
   }
 
   @Get()
-  async showAllIdeas(): Promise<IdeaRO[]> {
-    return await this.IdeaService.showAllIdeas();
+  async showAllIdeas(@Query('page') page: number): Promise<IdeaRO[]> {
+    return await this.ideaService.showAllIdeas(page);
   }
 
   @Post()
@@ -41,12 +42,12 @@ export class IdeaController {
     @CustomUser('id') user: string,
   ): Promise<IdeaRO> {
     this.LogData({ user, data });
-    return await this.IdeaService.createIdea(data, user);
+    return await this.ideaService.createIdea(data, user);
   }
 
   @Get(':id')
   async readIdea(@Param('id') id: string) {
-    return await this.IdeaService.readIdea(id);
+    return await this.ideaService.readIdea(id);
   }
 
   @Put(':id')
@@ -57,7 +58,7 @@ export class IdeaController {
     @Body() data: Partial<IdeaDTO>,
     @CustomUser('id') user: string,
   ): Promise<IdeaRO> {
-    return await this.IdeaService.updateIdea(id, user, data);
+    return await this.ideaService.updateIdea(id, user, data);
   }
 
   @Delete(':id')
@@ -66,21 +67,21 @@ export class IdeaController {
     @Param('id') id: string,
     @CustomUser('id') user: string,
   ): Promise<{ deleted: string }> {
-    return await this.IdeaService.removeIdea(id, user);
+    return await this.ideaService.removeIdea(id, user);
   }
 
   @Post(':id/upvote')
   @UseGuards(AuthGuard('jwt'))
   async upvoteIdea(@Param('id') id: string, @CustomUser('id') user: string) {
     this.LogData({ id, user });
-    return await this.IdeaService.upvoteIdea(id, user);
+    return await this.ideaService.upvoteIdea(id, user);
   }
 
   @Delete(':id/downvote')
   @UseGuards(AuthGuard('jwt'))
   async downvoteIdea(@Param('id') id: string, @CustomUser('id') user: string) {
     this.LogData({ id, user });
-    return await this.IdeaService.downvoteIdea(id, user);
+    return await this.ideaService.downvoteIdea(id, user);
   }
 
   @Post(':id/bookmark')
@@ -90,7 +91,7 @@ export class IdeaController {
     @CustomUser('id') user: string,
   ): Promise<UserRO> {
     this.LogData({ id, user });
-    return await this.IdeaService.addBookmark(id, user);
+    return await this.ideaService.addBookmark(id, user);
   }
 
   @Delete(':id/bookmark')
@@ -100,6 +101,6 @@ export class IdeaController {
     @CustomUser('id') user: string,
   ): Promise<UserRO> {
     this.LogData({ id, user });
-    return await this.IdeaService.deleteBookmark(id, user);
+    return await this.ideaService.deleteBookmark(id, user);
   }
 }
