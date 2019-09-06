@@ -47,13 +47,23 @@ export class CommentService {
   }
 
   async showCommentsByIdea(ideaId: string) {
-    const idea = await this.findIdeaHelper(ideaId, [
-      'comments',
-      'comments.author',
-      'comments.idea',
-    ]);
+    try {
+      const idea = await this.findIdeaHelper(ideaId, [
+        'comments',
+        'comments.author',
+        'comments.idea',
+      ]);
 
-    return idea.comments;
+      if (!idea) {
+        throw new HttpException('Comment Not Found', HttpStatus.BAD_REQUEST);
+      }
+
+      return idea.comments.map(comment => {
+        return { ...comment, author: comment.author.toResponseObject() };
+      });
+    } catch (error) {
+      throw error;
+    }
   }
 
   async showCommentsByUser(id: string) {

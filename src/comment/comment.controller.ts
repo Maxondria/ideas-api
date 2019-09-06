@@ -18,21 +18,21 @@ import { commentDTO } from './comment.dto';
 @Controller('api/comments')
 export class CommentController {
   private logger = new Logger('IdeaController');
-  constructor(private CommentService: CommentService) {}
+  constructor(private commentService: CommentService) {}
 
   @Get(':id')
   async showComment(@Param('id') commentId: string) {
-    return await this.CommentService.showComment(commentId);
+    return await this.commentService.showComment(commentId);
   }
 
   @Get('idea/:id')
   async showCommentsByIdea(@Param('id') ideaId: string) {
-    return await this.CommentService.showCommentsByIdea(ideaId);
+    return await this.commentService.showCommentsByIdea(ideaId);
   }
 
   @Get('user/:id')
   async showCommentsByUser(@Param('id') userId: string) {
-    return await this.CommentService.showCommentsByUser(userId);
+    return await this.commentService.showCommentsByUser(userId);
   }
 
   @Delete(':id')
@@ -41,7 +41,7 @@ export class CommentController {
     @Param('id') Id: string,
     @CustomUser('id') userId: string,
   ) {
-    return await this.CommentService.deleteComment(Id, userId);
+    return await this.commentService.deleteComment(Id, userId);
   }
 
   @Post('idea/:id')
@@ -52,6 +52,6 @@ export class CommentController {
     @Param('id') ideaId: string,
     @Body() data: Partial<commentDTO>,
   ) {
-    return await this.CommentService.addComment(ideaId, userId, data);
+    return await this.commentService.addComment(ideaId, userId, data);
   }
 }
