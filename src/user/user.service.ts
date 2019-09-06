@@ -1,20 +1,20 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { userEntity } from './user.entity';
+import { UserEntity } from './user.entity';
 import { UserRO, UserDTO } from './user.dto';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(userEntity)
-    private userRepository: Repository<userEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   async findUser(
     username: string,
     Exception: boolean = true,
-  ): Promise<userEntity> {
+  ): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { username } });
     if (Exception) {
       if (user) {

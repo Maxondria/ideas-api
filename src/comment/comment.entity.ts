@@ -7,11 +7,11 @@ import {
   ManyToOne,
   JoinTable,
 } from 'typeorm';
-import { userEntity } from '../user/user.entity';
-import { ideaEntity } from '../idea/idea.entity';
+import { UserEntity } from '../user/user.entity';
+import { IdeaEntity } from '../idea/idea.entity';
 
 @Entity('comment')
-export class commentEntity {
+export class CommentEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -24,10 +24,10 @@ export class commentEntity {
   @Column('text')
   comment: string;
 
-  @ManyToOne(type => userEntity)
+  @ManyToOne(type => UserEntity)
   @JoinTable()
-  author: userEntity;
+  author: UserEntity;
 
-  @ManyToOne(type => ideaEntity, idea => idea.comments)
-  idea: ideaEntity;
+  @ManyToOne(type => IdeaEntity, idea => idea.comments)
+  idea: IdeaEntity;
 }

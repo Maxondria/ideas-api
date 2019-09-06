@@ -1,33 +1,33 @@
 import { Injectable, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { ideaEntity } from './idea.entity';
+import { IdeaEntity } from './idea.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { IdeaDTO, IdeaRO } from './idea.dto';
-import { userEntity } from '../user/user.entity';
+import { UserEntity } from '../user/user.entity';
 import { UserRO } from '../user/user.dto';
 import { Votes } from '../shared/votes.enum';
 
 @Injectable()
 export class IdeaService {
   constructor(
-    @InjectRepository(ideaEntity)
-    private ideaRepository: Repository<ideaEntity>,
-    @InjectRepository(userEntity)
-    private userRepository: Repository<userEntity>,
+    @InjectRepository(IdeaEntity)
+    private ideaRepository: Repository<IdeaEntity>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {}
 
   private async ideaExists(id: string): Promise<IdeaRO> {
     const idea = await this.ideaRepository.findOne({
       where: { id },
-      relations: ['author'],
+      relations: ['author', 'comments'],
     });
     if (!idea) {
       throw new HttpException('Resource Not Found', HttpStatus.NOT_FOUND);
     }
-    return this.sanitizeDataWithUser(idea);
+    return this.ScrapOffUserPassword(idea);
   }
 
-  private sanitizeDataWithUser(idea: ideaEntity): IdeaRO | any {
+  private ScrapOffUserPassword(idea: IdeaEntity): IdeaRO | any {
     const response: any = {
       ...idea,
       author: idea.author.toResponseObject(),
@@ -82,7 +82,7 @@ export class IdeaService {
     }
   }
 
-  private async CastVote(idea: ideaEntity, user: userEntity, vote: Votes) {
+  private async CastVote(idea: IdeaEntity, user: UserEntity, vote: Votes) {
     const opposite = vote === Votes.UP ? Votes.DOWN : Votes.UP;
     if (
       idea[opposite].filter(voter => voter.id === user.id).length > 0 ||
@@ -126,9 +126,9 @@ export class IdeaService {
 
   async showAllIdeas(): Promise<IdeaRO[]> {
     const ideas = await this.ideaRepository.find({
-      relations: ['author', 'upvotes', 'downvotes'],
+      relations: ['author', 'upvotes', 'downvotes', 'comments'],
     });
-    return ideas.map(idea => this.sanitizeDataWithUser(idea));
+    return ideas.map(idea => this.ScrapOffUserPassword(idea));
   }
 
   async createIdea(data: IdeaDTO, userId: string): Promise<IdeaRO> {
@@ -136,7 +136,7 @@ export class IdeaService {
     if (user) {
       const idea = await this.ideaRepository.create({ ...data, author: user });
       await this.ideaRepository.save(idea);
-      return this.sanitizeDataWithUser(idea);
+      return this.ScrapOffUserPassword(idea);
     }
     throw new HttpException("User doesn't Exist", HttpStatus.NOT_FOUND);
   }
@@ -185,7 +185,7 @@ export class IdeaService {
         user.bookmarks.filter(bookmark => bookmark.id === idea.id).length < 1
       ) {
         user.bookmarks.push(idea);
-        this.userRepository.save(user);
+        await this.userRepository.save(user);
       } else {
         throw new HttpException(
           'IDEA ALREADY BOOKMARKED',
@@ -209,7 +209,7 @@ export class IdeaService {
         user.bookmarks = user.bookmarks.filter(
           bookmark => bookmark.id !== idea.id,
         );
-        this.userRepository.save(user);
+        await this.userRepository.save(user);
       } else {
         throw new HttpException('IDEA DOESNOT EXIST', HttpStatus.BAD_REQUEST);
       }
