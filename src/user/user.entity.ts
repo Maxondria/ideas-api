@@ -48,7 +48,7 @@ export class UserEntity {
 
   toResponseObject(): UserRO {
     const { id, created, username, updated, ideas, bookmarks } = this;
-    let response: any = { id, created, username, updated };
+    const response: any = { id, created, username, updated };
     if (ideas) {
       response.ideas = ideas;
     }

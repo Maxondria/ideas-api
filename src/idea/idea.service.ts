@@ -138,7 +138,7 @@ export class IdeaService {
       await this.ideaRepository.save(idea);
       return this.ScrapOffUserPassword(idea);
     }
-    throw new HttpException("User doesn't Exist", HttpStatus.NOT_FOUND);
+    throw new HttpException('User doesn\'t Exist', HttpStatus.NOT_FOUND);
   }
 
   async readIdea(id: string): Promise<IdeaRO> {
